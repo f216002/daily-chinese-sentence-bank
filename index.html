@@ -33,7 +33,7 @@
     </header>
     <section class="toolbar" aria-label="Search and filter">
       <input id="search" class="search" type="search" placeholder="Search Chinese, Hindi or English…" aria-label="Search sentences">
-      <select id="category" class="select" aria-label="Filter by category"><option value="">All topics / सभी विषय</option></select>
+      <select id="category" class="select" aria-label="Filter by category"><option value="">所有主題 / All topics</option></select>
     </section>
     <section class="actions"><div id="count" class="count">Loading…</div><div><button id="refresh" class="btn btn-soft">↻ Refresh</button> <button id="add" class="btn btn-primary hidden">＋ Add sentence</button></div></section>
     <section id="loading" class="state"><div class="spinner"></div><strong>Loading your sentences…</strong><br>आपके वाक्य लोड हो रहे हैं…</section>
@@ -54,24 +54,28 @@
   <nav id="pager" class="pager hidden" aria-label="Learning card navigation"><button id="prev">← Previous</button><span id="position" class="position"></span><button id="next">Next →</button></nav>
   <script>
     const API_URL='https://script.google.com/macros/s/AKfycbzCIONd5iT3edcTmBotC2KWFR0Lx7FhQOzSYNtJ3Ap9KsaokoLQ8C8I2akhCqjbz1Tm/exec';
-    const CATEGORY_HINDI={
-      '日常生活':'दैनिक जीवन',
-      '日常行程':'दैनिक कार्यक्रम',
-      '日常行程與購物':'दैनिक कार्यक्रम और खरीदारी',
-      '購物與市場':'खरीदारी और बाज़ार',
-      '天氣':'मौसम',
-      '天氣與環境':'मौसम और पर्यावरण',
-      '家庭與家人':'घर और परिवार',
-      '學校與學習':'स्कूल और पढ़ाई',
-      '工作':'काम',
-      '交通與旅行':'यातायात और यात्रा',
-      '健康與醫療':'स्वास्थ्य और चिकित्सा',
-      '飲食':'खाना-पीना',
-      '時間與日期':'समय और तारीख',
-      '朋友與社交':'दोस्त और सामाजिक जीवन',
-      '情緒與感受':'भावनाएँ और एहसास',
-      '問候與介紹':'अभिवादन और परिचय',
-      '其他':'अन्य'
+    const CATEGORY_ENGLISH={
+      '日常生活':'Daily Life',
+      '日常行程':'Daily Routine',
+      '日常行程與購物':'Daily Routine and Shopping',
+      '日常生活／購物':'Daily Life and Shopping',
+      '日常生活與購物':'Daily Life and Shopping',
+      '日常計畫與出行':'Daily Plans and Travel',
+      '購物與市場':'Shopping and Markets',
+      '日常會話與意見表達':'Daily Conversation and Expressing Opinions',
+      '天氣':'Weather',
+      '天氣與環境':'Weather and Environment',
+      '家庭與家人':'Home and Family',
+      '學校與學習':'School and Learning',
+      '工作':'Work',
+      '交通與旅行':'Transportation and Travel',
+      '健康與醫療':'Health and Medical Care',
+      '飲食':'Food and Dining',
+      '時間與日期':'Time and Dates',
+      '朋友與社交':'Friends and Social Life',
+      '情緒與感受':'Emotions and Feelings',
+      '問候與介紹':'Greetings and Introductions',
+      '其他':'Other'
     };
     const state={all:[],filtered:[],index:0,formUrl:'',requestScript:null,requestTimer:null};
     const $=id=>document.getElementById(id);
@@ -98,8 +102,8 @@
     function receive(data){state.all=Array.isArray(data.cards)?data.cards:[];state.formUrl=data.formUrl||'';$('add').classList.toggle('hidden',!state.formUrl);buildCategories();applyFilters()}
     function fail(err){show('error');text('errorText',err&&err.message?err.message:String(err||'Unknown error'))}
     function show(name){['loading','empty','error','card'].forEach(id=>$(id).classList.toggle('hidden',id!==name));$('pager').classList.toggle('hidden',name!=='card')}
-    function categoryLabel(category){const c=category||'其他';return `${c} / ${CATEGORY_HINDI[c]||'अन्य'}`}
-    function buildCategories(){const current=$('category').value;const cats=[...new Set(state.all.map(x=>x.category).filter(Boolean))].sort();$('category').innerHTML='<option value="">All topics / सभी विषय</option>';cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=categoryLabel(c);$('category').appendChild(o)});$('category').value=current}
+    function categoryLabel(category){const c=category||'其他';return `${c} / ${CATEGORY_ENGLISH[c]||'Other'}`}
+    function buildCategories(){const current=$('category').value;const cats=[...new Set(state.all.map(x=>x.category).filter(Boolean))].sort();$('category').innerHTML='<option value="">所有主題 / All topics</option>';cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=categoryLabel(c);$('category').appendChild(o)});$('category').value=current}
     function applyFilters(){const q=$('search').value.trim().toLowerCase(),cat=$('category').value;state.filtered=state.all.filter(c=>(!cat||c.category===cat)&&(!q||[c.chinese,c.pinyin,c.originalHindi,c.correctedHindi,c.romanHindi,c.english,c.category,c.vocabulary].join(' ').toLowerCase().includes(q)));state.index=0;render()}
     function render(){text('count',`${state.filtered.length} sentence${state.filtered.length===1?'':'s'} / ${state.all.length} total`);if(!state.filtered.length){show('empty');return}show('card');const c=state.filtered[state.index];text('chip',categoryLabel(c.category));$('review').classList.toggle('hidden',!c.needsReview);text('chinese',c.chinese);text('pinyin',c.pinyin);text('hindi',c.correctedHindi||c.originalHindi);text('roman',c.romanHindi);text('english',c.english);text('hindiExplanation',c.hindiExplanation);text('pattern',c.pattern);renderVocabulary(c.vocabulary);text('exampleChinese',c.exampleChinese);text('examplePinyin',c.examplePinyin);text('exampleHindi',c.exampleHindi);text('exampleEnglish',c.exampleEnglish);text('usageNote',c.usageNote);text('englishExplanation',c.englishExplanation);text('position',`${state.index+1} / ${state.filtered.length}`);$('prev').disabled=state.index===0;$('next').disabled=state.index===state.filtered.length-1;window.scrollTo({top:0,behavior:'smooth'})}
     function renderVocabulary(raw){const box=$('vocabulary');box.textContent='';const lines=String(raw||'').split(/\n|<br\s*\/?>/i).map(s=>s.trim()).filter(Boolean);if(!lines.length){box.textContent='No vocabulary available.';return}lines.forEach(line=>{const parts=line.split('｜');const div=document.createElement('div');div.className='word';const strong=document.createElement('strong');strong.textContent=[parts[0],parts[1]].filter(Boolean).join(' · ');div.appendChild(strong);if(parts.length>2)div.appendChild(document.createTextNode(' — '+parts.slice(2).join(' · ')));box.appendChild(div)})}
