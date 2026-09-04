@@ -63,13 +63,13 @@
       if(state.requestTimer)clearTimeout(state.requestTimer);
       const script=document.createElement('script');
       state.requestScript=script;
-      script.src=API_URL+'?callback=接收學習卡資料&_='+Date.now();
+      script.src=API_URL+'?callback=receiveChineseCards&_='+Date.now();
       script.async=true;
       script.onerror=()=>fail(new Error('Unable to connect to the learning database.'));
       state.requestTimer=setTimeout(()=>fail(new Error('The request took too long. Please try again.')),20000);
       document.body.appendChild(script);
     }
-    window.接收學習卡資料=function(data){
+   window.receiveChineseCards=function(data){
       if(state.requestTimer)clearTimeout(state.requestTimer);
       if(state.requestScript)state.requestScript.remove();
       state.requestScript=null;
